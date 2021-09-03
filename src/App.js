@@ -1,18 +1,23 @@
 import { hidden } from "ansi-colors";
 import React, {useState} from "react";
-import Board from './components/Board'
 import {calculateWinner} from './helper'
+
+import Board from './components/Board'
+import History from './components/History'
+import Message from "./components/Message";
 
 import './styles/root.scss'
 
+const NEW_GAME = [{board:Array(9).fill(null),isNext:true}];
+
 function App(){
-const [history,setHistory] = useState([{board:Array(9).fill(null),isNext:true},])
+const [history,setHistory] = useState(NEW_GAME)
 const [currentMove,setCurrentMove] = useState(0);
 
 const current = history[currentMove];
 
-const winner = calculateWinner(current.board);
-const message = winner ? `Winner is ${winner}`:`Next player is ${current.isNext ? 'O':'X'}`
+
+const {winner,winingSquares} = calculateWinner(current.board);
 
 const handleOnClick = (position)=>{
     if(current.board[position] || winner){
@@ -30,12 +35,23 @@ const handleOnClick = (position)=>{
         return prev.concat({board:newBoard,isNext:!last.isNext})
     })
     setCurrentMove(prev=>prev+1)
+};
+
+const startGame = ()=>{
+  setHistory(NEW_GAME);
+  setCurrentMove(0);
 }
+
+const moveTo =(move)=>{
+  setCurrentMove(move);
+};
   return (
     <div className="app">
     <h1>TIC TAC TOE</h1>
-    <h2>{message}</h2>
-    <Board board={current.board} isNext={current.isNext} handleOnClick={handleOnClick}/>
+    <Message winner={winner} current={current}/>
+    <Board board={current.board} isNext={current.isNext} handleOnClick={handleOnClick} winingSquares={winingSquares}/>
+    <button className="btn-reset" type="button" onClick={startGame}>Start Game</button>
+     <History history={history} moveTo={moveTo} currentMove={currentMove} />
     </div>
   )
 }
